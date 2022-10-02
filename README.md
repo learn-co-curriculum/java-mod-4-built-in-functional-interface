@@ -355,6 +355,23 @@ public class Example7 {
 }
 ```
 
+## Summary
+
+We can often use `java.util.function` functional interfaces to avoid creating new user-defined functional interfaces.
+
+| Functional Interface | Parameter Type and Return Type | Method | Variants                                                                                                                                                                                                                                                         |
+|----------------------|--------------------------------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Function<T,R>`      | T -> R                         | apply  | `DoubleFunction<R>`, `DoubleToIntFunction`, `DoubleToLongFunction`, `IntFunction<R>`, `IntToDoubleFunction`, `IntToLongFunction`, `LongFunction<R>`, `LongToDoubleFunction`, `LongToIntFunction`, `ToDoubleFunction<T>`, `ToIntFunction<T>`, `ToLongFunction<T>` |
+| `BiFunction<T,U,R>`  | (T,U) -> R                     | apply  | `ToDoubleBiFunction<T>`, `ToIntBiFunction<T>`, `ToLongBiFunction<T>`                                                                                                                                                                                             |
+| `UnaryOperator<T>`   | T -> T                         | apply  | `DoubleUnaryOperator`, `IntUnaryOperator`, `LongUnaryOperator`                                                                                                                                                                                                   |
+| `BinaryOperator<T>`  | (T,T) -> R                     | apply  | `DoubleBinaryOperator`, `IntBinaryOperator`, `LongBinaryOpererator`                                                                                                                                                                                              |
+| `Predicate<T>`       | T -> boolean                   | test   | `DoublePredicate`, `IntPredicate`, `LongPredicate`                                                                                                                                                                                                               |
+| `BiPredicate<T,U>`   | (T,U) -> boolean               | test   |                                                                                                                                                                                                                                                                  |
+| `Supplier<T>`        | () -> T                        | get    | `DoubleSupplier`, `IntSupplier`, `LongSupplier`, `BooleanSupplier`                                                                                                                                                                                               |
+| `Consumer<T>`        | T -> void                      | accept | `DoubleConsumer`, `IntConsumer`, `LongConsumer`, `ObjDoubleConsumer<T>`, `ObjIntConsumer<T>`, `ObjLongConsumer<T>`                                                                                                                                               |
+| `BiConsumer<T, U>`   | (T,U) -> void                  | accept |                                                                                                                                                                                                                                                                  |
+
+
 ## References
 
 [java.util.function](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html)
