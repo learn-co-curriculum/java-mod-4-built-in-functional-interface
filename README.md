@@ -2,8 +2,8 @@
 
 ## Learning Goals
 
-- Learn about the different standard functional interfaces in Java.
-- Use the different functional interfaces.
+- Define the different standard functional interfaces in Java.
+- Compare a user defined functional interface to an equivalent `java.util.function` functional interface.
 
 ## What are Built-In Functional Interfaces?
 
@@ -17,53 +17,90 @@ functional interfaces can be grouped into the following:
 - Suppliers
 - Consumers
 
+We can often use Java's built-in functional interfaces to avoid creating new user-defined functional interfaces.
+
 ## Functions
 
-These interfaces have a method that take in arguments and returns a result.
+These interfaces have a method named `apply` that take in arguments and returns a result.
 
 The `Function<T, R>` interface in the `java.util.function` package accepts a
 value of type `T` and returns a result of type `R`. We pass in the arguments to
 the `apply` method of the interface.
 
-```java
-import java.util.function.Function;
+#### Don't write this:
 
-public class Example {
+```java
+@FunctionalInterface
+interface MyStringIntFunction {
+    int apply(String s);
+}
+
+public class Example1 {
     public static void main(String[] args) {
-        Function<String, Integer> getLength = str -> str.length();
-        System.out.println(getLength.apply("hello")); // 5
+        MyStringIntFunction getLength = str -> str.length();
+        System.out.println( getLength.apply("hello") ); //5
     }
 }
 ```
 
-Note that we can also write the getLength function with a method reference.
-Using method references is the preferred way but we’ll be using explicit
+#### Write this instead:
+
+```java
+import java.util.function.Function;
+
+public class Example1 {
+    public static void main(String[] args) {
+        Function<String, Integer> getLength = str -> str.length();
+        System.out.println( getLength.apply("hello" ) ); //5
+    }
+}
+```
+
+Note that we can also write the length function with a method reference.
+Using method references is the preferred way, but we’ll be using explicit
 arguments to illustrate the interfaces better.
+Method references will be covered in detail in another lesson.
 
 Here’s how we could write the same function with a method reference:
 
 ```java
-import java.util.function.Function;
-
-public class Example {
-    public static void main(String[] args) {
-        Function<String, Integer> getLength = String::length;
-        System.out.println(getLength.apply("hello")); // 5
-    }
-}
+Function<String, Integer> length = String::length;
+System.out.println(length.apply("hello")); // 5
 ```
+
+### Binary Functions
 
 We can also use a functional interface method that takes in two parameters. The
 `BiFunction<T, U, R>` interface accepts two values of type `T`, `U` and returns
 a result of type `R`.
 
+#### Don't write this:
+
+```java
+@FunctionalInterface
+interface MyDoubleIntStringBiFunction {
+    String apply(double d, int i);
+}
+
+public class Example2 {
+    public static void main(String[] args) {
+        MyDoubleIntStringBiFunction splitBill = 
+            (billTotal, numPeople) -> String.format("You owe $%.2f", billTotal/numPeople);
+        System.out.println( splitBill.apply(24.80, 4) ); //You owe $6.20
+  }
+}
+```
+
+#### Write this instead:
+
 ```java
 import java.util.function.BiFunction;
 
-public class Example {
+public class Example2 {
     public static void main(String[] args) {
-        BiFunction<Integer, Integer, Integer> add = (x, y) -> x + y;
-        System.out.println(add.apply(10, 5)); // 15
+        BiFunction<Double, Integer, String> splitBill = 
+                (billTotal, numPeople) -> String.format("You owe $%.2f", billTotal/numPeople);
+        System.out.println( splitBill.apply(24.80, 4) ); //You owe $6.20
     }
 }
 ```
@@ -74,10 +111,28 @@ Operator interface methods have parameters and return values of the same type.
 The `UnaryOperator<T>` accepts an argument of type `T` and returns a value of
 the same type.
 
+#### Don't write this:
+
+```java
+@FunctionalInterface
+interface MyIntOperator {
+    int apply(int i);
+}
+
+public class Example3 {
+    public static void main(String[] args) {
+        MyIntOperator multiplyBy2 = num -> num * 2;
+        System.out.println(multiplyBy2.apply(5)); // 10
+  }
+}
+```
+
+#### Write this instead:
+
 ```java
 import java.util.function.UnaryOperator;
 
-public class Example {
+public class Example3 {
     public static void main(String[] args) {
         UnaryOperator<Integer> multiplyBy2 = num -> num * 2;
         System.out.println(multiplyBy2.apply(5)); // 10
@@ -85,33 +140,52 @@ public class Example {
 }
 ```
 
-The `java.util.function` package also provides interfaces prefixed with data
+#### Better yet: 
+
+The `java.util.function` package provides interfaces prefixed with data
 types to make the code’s intention clearer. For example, it provides
 `IntUnaryOperator`, `LongUnaryOperator`, and `DoubleUnaryOperator`.
 
 ```java
-import java.util.function.LongUnaryOperator;
+import java.util.function.IntUnaryOperator;
 
-public class Example {
+public class Example3 {
     public static void main(String[] args) {
-        LongUnaryOperator multiplyBy2 = num -> num * 2;
-        Long res = multiplyBy2.applyAsLong(5);
-        System.out.println(res); // 10
-        System.out.println(res.getClass()); // class java.lang.Long
+        IntUnaryOperator multiplyBy2 = num -> num * 2;
+        System.out.println(multiplyBy2.applyAsInt(5)); // 10
     }
 }
 ```
 
-Note that we’ve used the `applyAsLong` method instead of the `apply` method
-we’ve been using.
+Note that we’ve used the `applyAsInt` method instead of the `apply` method.
+
+### Binary Operators
 
 There are also operator interfaces with methods that accept two arguments
 similar to the `BiFunction` interface.
 
+#### Don't write this:
+
+```java
+@FunctionalInterface
+interface MyIntBinaryOperator {
+    int apply(int i, int j);
+}
+
+public class Example4 { 
+    public static void main(String[] args) {
+        MyIntBinaryOperator multiply = (x, y) -> x * y;
+        System.out.println(multiply.apply(3, 9)); // 27
+    }
+}
+```
+
+#### Write this instead:
+
 ```java
 import java.util.function.BinaryOperator;
 
-public class Example {
+public class Example4 {
     public static void main(String[] args) {
         BinaryOperator<Integer> multiply = (x, y) -> x * y;
         System.out.println(multiply.apply(3, 9)); // 27
@@ -119,13 +193,50 @@ public class Example {
 }
 ```
 
+
+#### Better yet:
+
+```java
+import java.util.function.IntBinaryOperator;
+
+public class Example4 {
+    public static void main(String[] args) {
+        IntBinaryOperator multiply = (x, y) -> x * y;
+        System.out.println(multiply.applyAsInt(3, 9)); // 27
+    }
+}
+```
+
+Note the method is named `applyAsInt` rather than `apply`.
+
 ## Predicates
 
 Predicates accept arguments and return a boolean value. We supply the arguments
 to the `test` method instead of the `apply` method.
 
+#### Don't write this:
+
 ```java
-public class Example {
+@FunctionalInterface
+interface MyIntPredicate {
+    boolean test(int i);
+}
+
+public class Example5 {
+    public static void main(String[] args) {
+        MyIntPredicate isOdd = num -> num % 2 != 0;
+        System.out.println(isOdd.test(5)); // true
+        System.out.println(isOdd.test(2)); // false
+    }
+}
+```
+
+#### Write this instead:
+
+```java
+import java.util.function.Predicate;
+
+public class Example5 {
     public static void main(String[] args) {
         Predicate<Integer> isOdd = num -> num % 2 != 0;
         System.out.println(isOdd.test(5)); // true
@@ -134,41 +245,133 @@ public class Example {
 }
 ```
 
-## Suppliers
-
-Suppliers don’t accept any arguments and returns a single value. We need to use
-the `get` method to access the value.
+#### Better yet:
 
 ```java
-import java.util.function.Supplier;
+import java.util.function.IntPredicate;
 
-public class Example {
+public class Example5 {
     public static void main(String[] args) {
-        Supplier<String> fruit = () -> "Apple";
-        System.out.println(fruit.get()); // Apple
+        IntPredicate isOdd3 = num -> num % 2 != 0;
+        System.out.println(isOdd.test(5)); // true
+        System.out.println(isOdd.test(2)); // false
     }
 }
 ```
 
-There are specialized supplier interfaces such as `IntSupplier` and
-`BooleanSupplier` as well.
+## Suppliers
+
+Suppliers don’t accept any arguments and return a single value. We need to use
+the `get` method to access the value.
+
+#### Don't write this:
+
+```java
+@FunctionalInterface
+interface MyIntSupplier {
+    int get();
+}
+
+public class Example6 {
+    public static void main(String[] args) {
+        MyIntSupplier randInt = () -> new java.util.Random().nextInt(10);
+        System.out.println(randInt.get()); // 0..9
+    }
+}
+```
+
+#### Write this instead:
+
+```java
+import java.util.function.Supplier;
+
+public class Example6 {
+    public static void main(String[] args) {
+        Supplier<Integer> randInt = () -> new java.util.Random().nextInt(10);
+        System.out.println(randInt.get()); // 0..9
+    }
+}
+```
+
+#### Better yet:
+
+```java
+import java.util.function.IntSupplier;
+
+public class Example6 {
+    public static void main(String[] args) {
+        IntSupplier randInt = () -> new java.util.Random().nextInt(10);
+        System.out.println(randInt.getAsInt()); // 0..9
+    }
+}
+```
 
 ## Consumers
 
 Consumers accept arguments but don’t return any values.
 
+#### Don't write this:
+
 ```java
 import java.util.function.Consumer;
+import java.util.function.IntConsumer;
 
-public class Example {
+@FunctionalInterface
+interface MyIntConsumer {
+    void accept(int i);
+}
+
+public class Example7 {
     public static void main(String[] args) {
-        Consumer<String> print = str -> System.out.println(str);
-        print.accept("Hello!"); // Hello!
+        MyIntConsumer print = i -> {System.out.println("value is " + i); } ;
+        print.accept(7); //value is 7
     }
 }
 ```
 
+#### Write this instead:
+
+```java
+import java.util.function.Consumer;
+
+public class Example7 {
+    public static void main(String[] args) {
+        Consumer<Integer> print = i -> {System.out.println("value is " + i); } ;
+        print.accept(7); //value is 7
+    }
+}
+```
+
+#### Better yet:
+  
+```java
+import java.util.function.IntConsumer;
+
+public class Example7 {
+    public static void main(String[] args) {
+        IntConsumer print = i -> {System.out.println("value is " + i); } ;
+        print.accept(7); //value is 7
+    }
+}
+```
+
+## Summary
+
+We can often use `java.util.function` functional interfaces to avoid creating new user-defined functional interfaces.
+
+| Functional Interface | Parameter Type and Return Type | Method | Variants                                                                                                                                                                                                                                                         |
+|----------------------|--------------------------------|--------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `Function<T,R>`      | T -> R                         | apply  | `DoubleFunction<R>`, `DoubleToIntFunction`, `DoubleToLongFunction`, `IntFunction<R>`, `IntToDoubleFunction`, `IntToLongFunction`, `LongFunction<R>`, `LongToDoubleFunction`, `LongToIntFunction`, `ToDoubleFunction<T>`, `ToIntFunction<T>`, `ToLongFunction<T>` |
+| `BiFunction<T,U,R>`  | (T,U) -> R                     | apply  | `ToDoubleBiFunction<T>`, `ToIntBiFunction<T>`, `ToLongBiFunction<T>`                                                                                                                                                                                             |
+| `UnaryOperator<T>`   | T -> T                         | apply  | `DoubleUnaryOperator`, `IntUnaryOperator`, `LongUnaryOperator`                                                                                                                                                                                                   |
+| `BinaryOperator<T>`  | (T,T) -> R                     | apply  | `DoubleBinaryOperator`, `IntBinaryOperator`, `LongBinaryOpererator`                                                                                                                                                                                              |
+| `Predicate<T>`       | T -> boolean                   | test   | `DoublePredicate`, `IntPredicate`, `LongPredicate`                                                                                                                                                                                                               |
+| `BiPredicate<T,U>`   | (T,U) -> boolean               | test   |                                                                                                                                                                                                                                                                  |
+| `Supplier<T>`        | () -> T                        | get    | `DoubleSupplier`, `IntSupplier`, `LongSupplier`, `BooleanSupplier`                                                                                                                                                                                               |
+| `Consumer<T>`        | T -> void                      | accept | `DoubleConsumer`, `IntConsumer`, `LongConsumer`, `ObjDoubleConsumer<T>`, `ObjIntConsumer<T>`, `ObjLongConsumer<T>`                                                                                                                                               |
+| `BiConsumer<T, U>`   | (T,U) -> void                  | accept |                                                                                                                                                                                                                                                                  |
+
+
 ## References
 
-- `[java.util.function`
-  doc](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html)
+[java.util.function](https://docs.oracle.com/javase/8/docs/api/java/util/function/package-summary.html)
